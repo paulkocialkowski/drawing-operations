@@ -1,0 +1,19 @@
+bbb-0.png, bbb-1.png:
+- https://peach.blender.org/about/
+- Creative Commons Attribution 3.0 license
+- Blender Foundation, 2008, https://www.blender.org
+
+carcassonne.png:
+- https://commons.wikimedia.org/wiki/File:1_carcassonne_aerial_2016.jpg
+- Creative Commons Attribution-Share Alike 4.0 International license
+- Chensiyuan, https://en.wikipedia.org/wiki/User:Chensiyuan
+
+intel-skylake.png:
+- https://commons.wikimedia.org/wiki/File:Intel@14nm@@Skylake@Skylake-X(LCC)@i7-7820X@SR3L5_DSC09188_(39836095212).jpg
+- Creative Commons CC0 1.0 Universal Public Domain Dedication
+- Fritzchens Fritz from Berlin
+
+striped-dress.png:
+- https://commons.wikimedia.org/wiki/File:Striped_Shift_Dress_with_Pocket_Detailing_at_the_Waist_(16707311063).jpg
+- Creative Commons Attribution-Share Alike 2.0 Generic license
+- Jamie, https://www.flickr.com/people/63405864@N04
