@@ -1,0 +1,13 @@
+# drawing-operations
+
+Picture drawing and operations demo for the Bootlin Graphics training,
+implemented as a simple Wayland SHM client.
+
+Build with:
+$ make
+
+Run with:
+$ ./drawing-operations [demo]
+
+List available demos with:
+$ ./drawing-operations
