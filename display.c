@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include <wayland-client.h>
+#include "xdg-shell-client-protocol.h"
 
 #include "display.h"
 
@@ -43,11 +44,22 @@ static void output_scale(void *data, struct wl_output *output, int32_t factor)
 	printf("\n");
 }
 
+static void output_name(void *data, struct wl_output *output, const char *name)
+{
+}
+
+static void output_description(void *data, struct wl_output *output,
+			       const char *description)
+{
+}
+
 static const struct wl_output_listener output_listener = {
 	.geometry = output_geometry,
 	.mode = output_mode,
 	.done = output_done,
 	.scale = output_scale,
+	.name = output_name,
+	.description = output_description,
 };
 
 /* SHM */
@@ -66,6 +78,18 @@ static void shm_format(void *data, struct wl_shm *shm, uint32_t format)
 
 static const struct wl_shm_listener shm_listener = {
 	shm_format,
+};
+
+/* XDG Shell */
+
+static void xdg_shell_ping(void *data, struct xdg_wm_base *xdg_shell,
+			     uint32_t serial)
+{
+	xdg_wm_base_pong(xdg_shell, serial);
+}
+
+static const struct xdg_wm_base_listener xdg_shell_listener = {
+	.ping = xdg_shell_ping,
 };
 
 /* Registry */
@@ -88,10 +112,10 @@ static void registry_global(void *private, struct wl_registry *registry,
 		display->shm = wl_registry_bind(registry, id,
 						&wl_shm_interface,
 						version);
-	else if (!strcmp(interface, wl_shell_interface.name))
-		display->shell = wl_registry_bind(registry, id,
-						  &wl_shell_interface,
-						  version);
+	else if (!strcmp(interface, xdg_wm_base_interface.name))
+		display->xdg_shell = wl_registry_bind(registry, id,
+						      &xdg_wm_base_interface,
+						      3);
 }
 
 static void registry_global_remove(void *private, struct wl_registry *registry,
@@ -130,7 +154,7 @@ struct display *display_create(void)
 	wl_display_dispatch(display->display);
 
 	if (!display->output || !display->compositor || !display->shm ||
-	    !display->shell)
+	    !display->xdg_shell)
 		goto error;
 
 	ret = wl_output_add_listener(display->output, &output_listener, display);
@@ -138,6 +162,11 @@ struct display *display_create(void)
 		goto error;
 
 	ret = wl_shm_add_listener(display->shm, &shm_listener, display);
+	if (ret)
+		goto error;
+
+	ret = xdg_wm_base_add_listener(display->xdg_shell, &xdg_shell_listener,
+				       display);
 	if (ret)
 		goto error;
 
@@ -154,6 +183,18 @@ struct display *display_create(void)
 
 error:
 	if (display) {
+		if (display->output)
+			wl_output_destroy(display->output);
+
+		if (display->compositor)
+			wl_compositor_destroy(display->compositor);
+
+		if (display->shm)
+			wl_shm_destroy(display->shm);
+
+		if (display->xdg_shell)
+			xdg_wm_base_destroy(display->xdg_shell);
+
 		if (display->display)
 			wl_display_disconnect(display->display);
 
@@ -171,7 +212,7 @@ void display_destroy(struct display *display)
 	wl_output_destroy(display->output);
 	wl_compositor_destroy(display->compositor);
 	wl_shm_destroy(display->shm);
-	wl_shell_destroy(display->shell);
+	xdg_wm_base_destroy(display->xdg_shell);
 
 	wl_display_disconnect(display->display);
 

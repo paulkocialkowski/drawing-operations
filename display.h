@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include <wayland-client.h>
+#include "xdg-shell-client-protocol.h"
 
 struct display {
 	struct wl_display *display;
@@ -11,7 +12,7 @@ struct display {
 	struct wl_output *output;
 	struct wl_compositor *compositor;
 	struct wl_shm *shm;
-	struct wl_shell *shell;
+	struct xdg_wm_base *xdg_shell;
 
 	bool format_support;
 	bool alpha_support;

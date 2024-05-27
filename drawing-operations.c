@@ -16,12 +16,6 @@
 #include "drawing.h"
 #include "operations.h"
 
-static void demo_wait(void)
-{
-	printf("Press enter to continue ");
-	getchar();
-}
-
 static void demo_announce(char *name)
 {
 	printf("Starting demo: %s\n", name);
@@ -84,7 +78,7 @@ int demo_drawing(struct display *display, char *name)
 	int ret;
 
 	/* Window */
-	window = window_create(display, "Drawing demo");
+	window = window_create(display, "drawing-operations", "Drawing demo");
 	if (!window)
 		goto error;
 
@@ -154,13 +148,18 @@ int demo_drawing(struct display *display, char *name)
 //		draw_butterfly(buffer, xc, yc, r * 1. / 3., pixel_blue, 150, true);
 	}
 
+	ret = window_configured_wait(window);
+	if (ret)
+		goto error;
+
 	/* Draw buffer to window. */
 	ret = window_draw(window, buffer, NULL);
 	if (ret)
 		goto error;
 
-	/* Wait for user input. */
-	demo_wait();
+	ret = window_closed_wait(window);
+	if (ret)
+		goto error;
 
 	ret = 0;
 	goto complete;
@@ -202,6 +201,16 @@ static int demo_operation_scale(struct display *display,
 	/* Scale source buffer to destination buffer. */
 	operate_scaling(buffer_source, buffer_destination, factor);
 
+	/* Wait for window configure callback. */
+	ret = window_configured_wait(window_source);
+	if (ret)
+		goto error;
+
+	/* Wait for window configure callback. */
+	ret = window_configured_wait(window_destination);
+	if (ret)
+		goto error;
+
 	/* Draw source buffer to source window. */
 	ret = window_draw(window_source, buffer_source, NULL);
 	if (ret)
@@ -212,8 +221,15 @@ static int demo_operation_scale(struct display *display,
 	if (ret)
 		goto error;
 
-	/* Wait for user input. */
-	demo_wait();
+	/* Wait for window close callback. */
+	ret = window_closed_wait(window_source);
+	if (ret)
+		goto error;
+
+	/* Wait for window close callback. */
+	ret = window_closed_wait(window_destination);
+	if (ret)
+		goto error;
 
 	ret = 0;
 	goto complete;
@@ -265,6 +281,16 @@ static int demo_operation_scale_alias(struct display *display,
 	/* Up-scale temporary buffer to destination buffer. */
 	operate_scaling(buffer_temporary, buffer_destination, 1. / factor);
 
+	/* Wait for window configure callback. */
+	ret = window_configured_wait(window_source);
+	if (ret)
+		goto error;
+
+	/* Wait for window configure callback. */
+	ret = window_configured_wait(window_destination);
+	if (ret)
+		goto error;
+
 	/* Draw source buffer to source window. */
 	ret = window_draw(window_source, buffer_source, NULL);
 	if (ret)
@@ -275,8 +301,15 @@ static int demo_operation_scale_alias(struct display *display,
 	if (ret)
 		goto error;
 
-	/* Wait for user input. */
-	demo_wait();
+	/* Wait for window close callback. */
+	ret = window_closed_wait(window_source);
+	if (ret)
+		goto error;
+
+	/* Wait for window close callback. */
+	ret = window_closed_wait(window_destination);
+	if (ret)
+		goto error;
 
 	ret = 0;
 	goto complete;
@@ -320,6 +353,16 @@ static int demo_operation_filter(struct display *display,
 	/* Filter source buffer to destination buffer. */
 	operate_filter(buffer_source, buffer_destination, kernel, span);
 
+	/* Wait for window configure callback. */
+	ret = window_configured_wait(window_source);
+	if (ret)
+		goto error;
+
+	/* Wait for window configure callback. */
+	ret = window_configured_wait(window_destination);
+	if (ret)
+		goto error;
+
 	/* Draw source buffer to source window. */
 	ret = window_draw(window_source, buffer_source, NULL);
 	if (ret)
@@ -330,8 +373,15 @@ static int demo_operation_filter(struct display *display,
 	if (ret)
 		goto error;
 
-	/* Wait for user input. */
-	demo_wait();
+	/* Wait for window close callback. */
+	ret = window_closed_wait(window_source);
+	if (ret)
+		goto error;
+
+	/* Wait for window close callback. */
+	ret = window_closed_wait(window_destination);
+	if (ret)
+		goto error;
 
 	ret = 0;
 	goto complete;
@@ -364,12 +414,13 @@ int demo_operation(struct display *display, char *name)
 	int ret;
 
 	/* Source window */
-	window_source = window_create(display, "Operation demo source");
+	window_source = window_create(display, "drawing-operations",
+				      "Operation demo source");
 	if (!window_source)
 		goto error;
 
 	/* Destination window */
-	window_destination = window_create(display,
+	window_destination = window_create(display, "drawing-operations",
 					   "Operation demo destination");
 	if (!window_destination)
 		goto error;
