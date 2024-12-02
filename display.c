@@ -115,7 +115,7 @@ static void registry_global(void *private, struct wl_registry *registry,
 	else if (!strcmp(interface, xdg_wm_base_interface.name))
 		display->xdg_shell = wl_registry_bind(registry, id,
 						      &xdg_wm_base_interface,
-						      3);
+						      version);
 }
 
 static void registry_global_remove(void *private, struct wl_registry *registry,
